@@ -1,4 +1,4 @@
-Date,Event,Lockdown,LockdownDates,KeyDates
+eventDate,eventHeadline,lockdownNo,lockdownDates,keyEvents
 2020-03-12,Ontario closes all public schools.,None,0,1
 2020-03-13,Toronto’s universities cancel all in-person classes.,None,0,1
 2020-03-15,Ontario places all non-essential care and elective surgeries on hold.,None,0,1
