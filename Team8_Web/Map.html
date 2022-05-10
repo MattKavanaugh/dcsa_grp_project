@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+
+<head>
+	<title>Visualization of Toronto Crime Cases and COVID-19 Lockdown</title>
+	<link rel='stylesheet' id='font-css'  href='http://fonts.googleapis.com/css?family=Roboto:400,300,100' type='text/css' media='all' />
+	<link rel='stylesheet' id='font-css'  href='./css/map.css' type='text/css' media='all' />
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@3.2.1/dist/chart.min.js"></script>
+</head>
+
+<body>
+<div id='wrapper'>
+     <div id='map-canvas'></div>
+     <div id="displayInfo">
+					 <a href="index.html" id="last">HOME</a>
+					 <a href="analysis.html" id="next">ANALYSIS</a>
+					 <a href="map.html" id="next">MAP</a>
+					 <hr>
+
+		<h1>Relationship between crime types with Covid-19 Cases in Toronto</h1>
+        <p><b>What can you do on this page?</b><br/>You can compare the crime types and Covid-19 Cases of every district</p>
+
+				<p>
+					<b>How can you do that?</b>
+					<br/>1.choose the district you are interested in on the map<br/>
+						2.click 'Show Charts'<br/>
+						3.click 'Clear' everytime you redo step 1 & 2
+				</p>
+
+				<button class="showLink">Show Charts</button>
+				<button class="clearLink" >Clear</button>
+
+				<p>  </p>
+				<p>  </p>
+
+			  <canvas id="chart" width="600" height="230"></canvas>
+				<p>  </p>
+
+				<canvas id="chart2" width="600" height="230"></canvas>
+		</div>
+</div>
+
+<!-- The Javascript from external websites gets Loaded Here -->
+<script type='text/javascript' src='http://code.jquery.com/jquery-1.10.2.min.js?ver=1.10.2'></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=visualization&key=AIzaSyCK_2YHUeL00WeSl7OSZCKATaHIH7cxKG4"> </script>
+<script type='text/javascript' src='http://dev.spatialdatacapture.org/xdate/xdate.js'></script>
+<script type='text/javascript' src='./js/mapStyle.js'></script>
+
+<!-- The Javascript gets loaded here -->
+<script type="text/javascript">
+	var map;
+	var markerArray = [];
+	var dataArray = [];
+	var infowindow = new google.maps.InfoWindow({maxWidth: 300});
+  var port = 8899;
+
+	const chartdata=[];
+	const chartx=[];
+	const chartdata2=[];
+
+
+	$(document).ready(function() {
+
+		function initialize() {
+			var mapOptions = {
+				center: new google.maps.LatLng(43.680176,-79.402157),
+				zoom: 12,
+			 	styles: ManilaMap
+			};
+
+			map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+
+			google.maps.event.addListener(map, 'dragend', function() {
+				var bounds = map.getBounds();
+				console.log("SW: " + bounds.getSouthWest() + " NE: " + bounds.getNorthEast());
+				console.log("Center: " + map.getCenter().lat() + ", " +  map.getCenter().lng());
+				getData(map.getCenter().lat(), map.getCenter().lng());
+			});
+
+			getData(map.getCenter().lat(), map.getCenter().lng());
+		}
+
+				function getData(lat, lng){
+					var lat = lat.toFixed(2);
+					var lng = lng.toFixed(3);
+
+
+					console.log("Getting Data: " + lat + ", " + lng );
+
+					setAllMap(null);
+					markerArray = [];
+
+					$.getJSON( "http://dev.spatialdatacapture.org:XXXX/data/"+lat+"/"+lng, function( data ) {
+						$.each(data, function(k,v){
+
+							var latLng = new google.maps.LatLng(v.coords.y, v.coords.x);
+
+							dataArray.push(latLng);
+
+							var marker = new google.maps.Marker({
+		      					position: latLng,
+		      					icon: "./img/b1.svg",
+		      					customInfo: v.pid
+		      				});
+
+									function chartIt() {
+										const ctx = document.getElementById('chart');
+										Chart.defaults.color='#194350';
+										const myChart = new Chart(ctx, {
+										type: 'bar',
+										data: {
+												labels: chartx,
+												datasets: [{
+														label: 'XXXXXXXXXX',
+														data:chartdata,
+														backgroundColor: 'rgba(250, 127, 114, 1)',
+														//borderColor: 'rgba(255, 99, 132, 1)',
+														//borderWidth: 1
+												}]
+											},
+
+										});
+
+
+										$(".clearLink").click( function(event){
+											myChart.destroy();
+
+											chartdata.length = 0;
+											chartx.length = 0;
+											event.preventDefault();
+											location.reload();
+										});
+
+									};
+
+									function chartIt2() {
+										const ctx = document.getElementById('chart2');
+										Chart.defaults.color='#194350';
+										const myChart2 = new Chart(ctx, {
+										type: 'bar',
+										data: {
+												labels: chartx,
+												datasets: [{
+														label: 'XXXXXXX',
+														data:chartdata2,
+														backgroundColor: 'rgba(245, 162, 93, 1)',
+														yAxisID:'Amount',
+														//borderColor: 'rgba(255, 99, 132, 1)',
+														//borderWidth: 1
+												}]
+											},
+
+											//options: {
+	                    //scales: {
+												//x:{
+													//title:{
+														//display:true,
+														//text:'Station'
+
+													//}
+
+												//}
+
+	                   //}
+
+										});
+
+
+										$(".clearLink").click( function(event){
+											myChart2.destroy();
+
+											chartdata2.length = 0;
+											chartx2.length = 0;
+											event.preventDefault();
+											location.reload();
+										});
+
+									};
+
+							google.maps.event.addListener(marker, 'mouseover', function(content) {
+								return function(){
+									infowindow.setContent("");
+
+									//map.setCenter(new google.maps.LatLng(v.coords.y, v.coords.x));
+									$.getJSON("http://dev.spatialdatacapture.org:XXXX/data/location/"+this.customInfo, function( data ) {
+										var content = "<b>Station ID: </b>"+v.pid+"<br/><b>Station Location:</b><br/> "+v.location+"";
+								    	infowindow.setContent(content);
+								    });
+
+								    infowindow.open(map,this);
+								}
+
+
+							}(""));
+							google.maps.event.addListener(marker, 'mouseout', function(content) {
+								return function(){
+									infowindow.setContent("");
+
+										infowindow.close();
+								}
+
+
+							}(""));
+
+							google.maps.event.addListener(marker, 'click', function(clickinfo1,clickinfo2) {
+								return function(){
+									marker.setIcon("./img/b2.svg");
+
+									//map.setCenter(new google.maps.LatLng(v.coords.y, v.coords.x));
+									$.getJSON("http://dev.spatialdatacapture.org:XXXX/data/dropoff/pickup/location/"+this.customInfo, function( data ) {
+										console.log(v);
+										var clickinfo1 = v.dropoff;
+										var clickinfo2=v.pickup;
+										var clickx1=v.location
+										//var clickinfo= [v.dropoff, v.pickup];
+										chartdata.push(clickinfo1);
+										chartx.push(clickx1);
+										chartdata2.push(clickinfo2);
+										console.log(chartdata);
+
+										$(".showLink").click( function(event)
+										{
+											chartIt();
+											chartIt2();
+										});
+
+								    });
+
+								}
+
+							}(""));
+
+							markerArray.push(marker);
+
+		      			});
+
+		      			$("#photoNum").html(data.length);
+
+		      			setAllMap(map);
+					});
+				}
+		google.maps.event.addDomListener(window, 'load', initialize);
+
+	});
+	//  ******************* FUNCTIONS TO USE FOR THE MAP YOU DON"T NEED TO EDIT ANYTHING BELOW THIS LINE **************************************************
+
+	function createMarkers(){
+		var marker = new google.maps.Marker({
+  			position: latLng
+  		});
+	}
+
+	function setAllMap(map) {
+		for (var i = 0; i < markerArray.length; i++) {
+			markerArray[i].setMap(map);
+		}
+	}
+
+	function clearMarkers() {
+		setAllMarkers(null);
+	}
+
+	String.prototype.replaceAll = function(str1, str2, ignore) {
+    	return decodeURIComponent( this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(str2)=="string")?str2.replace(/\$/g,"$$$$"):str2) );
+	}
+</script>
+</body>
+
+</html>
