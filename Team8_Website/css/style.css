@@ -41,7 +41,7 @@ text-align: justify;}
 #analysis_content{
 	position: relative;
 	border-style: none;
-	background-color: rgb(116, 190, 147,0.4);
+	background-color: rgb(116, 190, 147,0.3);
 	z-index: 1;
 }
 
