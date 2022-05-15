@@ -35,13 +35,14 @@ a:active {
 
 h2 {margin: 2%;}
 p {margin: 3%;
-text-align: justify;}
+text-align: justify;
+font-family: 'Roboto', sans-serif;}
 
 
 #analysis_content{
 	position: relative;
 	border-style: none;
-	background-color: rgb(116, 190, 147,0.3);
+	background-color: white;
 	z-index: 1;
 }
 
@@ -158,15 +159,16 @@ height: 300pt;
 
 #introMap{
 	height: 100%;
-    width: 50%;
-    margin-top: 5%;
-    margin-right: 5%;
+    width: 70%;
+    margin-left: 31%;
     Float: right;
-}
+    border-style: dashed;
+    position: absolute;
+    }
 
 #map-canvas1{
-	height: 500pt;
-    width: 500pt;
+	height: 100%;
+    width: 70%;
     font-size: 25pt;
     background-color: rgba(255, 255, 255, 1.0);
 }
