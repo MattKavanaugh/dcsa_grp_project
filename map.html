@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+
+<head>
+	<title>Visualization of The Relation Between Toronto Crime Cases and COVID-19 Lockdown</title>
+	<link rel='stylesheet' id='font-css'  href='http://fonts.googleapis.com/css?family=Roboto:400,300,100' type='text/css' media='all' />
+	<link rel='stylesheet' id='font-css'  href='./css/map.css' type='text/css' media='all' />
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@3.2.1/dist/chart.min.js"></script>
+</head>
+
+<body>
+<div id='wrapper'>
+     <div id='map-canvas'></div>
+     <div id="displayInfo">
+					 <a href="index.html" id="last">HOME</a>
+					 <a href="map.html" id="next">MAP</a>
+					 <a href="analysis.html" id="next">ANALYSIS</a>
+					 <hr>
+
+		<h1>Relationship between crime types with Covid-19 Cases in Toronto</h1>
+        <p><b>What can you do on this page?</b><br/>You can compare the crime types and Covid-19 Cases of every district</p>
+				<p>
+					<b>How can you do that?</b>
+					<br/>1.choose <br/>
+						2.click<br/>
+						3.click 
+				</p>
+
+				<button class="showLink">Show Charts</button>
+				<button class="clearLink" >Clear</button>
+
+				<p>  </p>
+				<p>  </p>
+
+				<h3>Display by Crime Type</h3> 
+				<form>
+					<input type="radio" id="checkbox2" name="checkbox" value="checkbox2">
+					<label for="checkbox2">Assault Type</label><br>
+					<input type="radio" id="checkbox3" name="checkbox" value="checkbox3">
+					<label for="checkbox3">Break and Enter</label>
+					<input type="radio" id="checkbox4" name="checkbox" value="checkbox2">
+					<label for="checkbox2">Auto Theft</label><br>
+					<input type="radio" id="checkbox5" name="checkbox" value="checkbox3">
+					<label for="checkbox3">Robbery</label>
+					<input type="radio" id="checkbox6" name="checkbox" value="checkbox3">
+					<label for="checkbox3">Theft Over</label>
+				  </form>	
+				<p>
+					<small>
+						<a href="#" id="resetLink">Reset Map</a>
+						<a href="#" id="clearLink" class="right">Clear all Markers</a>
+					</small>
+				</p>
+
+			  <canvas id="chart" width="600" height="230"></canvas>
+				<p>  </p>
+				<canvas id="chart2" width="600" height="230"></canvas>
+	</div>
+</div>
+
+<!-- <div id="displayInfo">
+	<div>
+		<h3>Display by Crime Type</h3>  -->
+		<!-- <p>
+			// <a href="#" id="iPhoneLink">iPhone</a><br/>
+     		<a href="#" class='queryLink' data-query="TotalCrime" data-marker="pink_marker.png">Total Crime Cases</a><br/>
+     		<a href="#" class='queryLink' data-query="Assault" data-marker="blue_marker.png">Assault</a><br/>
+       		<a href="#" class='queryLink' data-query="Break and Enter" data-marker="orange_marker.png">Break and Enter</a><br/>
+      		<a href="#" class='queryLink' data-query="Auto Theft" data-marker="lightBlue_marker.png">Auto Theft</a><br/>
+     		<a href="#" class='queryLink' data-query="Robbery" data-marker="purple_marker.png">Robbery</a><br/>
+     		<a href="#" class='queryLink' data-query="Theft Over" data-marker="yellow_marker.png">Theft Over</a><br/>
+		</p> -->
+
+		<!-- <form>
+			<input type="radio" id="checkbox2" name="checkbox" value="checkbox2">
+			<label for="checkbox2">Assault Type</label><br>
+			<input type="radio" id="checkbox3" name="checkbox" value="checkbox3">
+			<label for="checkbox3">Break and Enter</label>
+			<input type="radio" id="checkbox4" name="checkbox" value="checkbox2">
+			<label for="checkbox2">Auto Theft</label><br>
+			<input type="radio" id="checkbox5" name="checkbox" value="checkbox3">
+			<label for="checkbox3">Robbery</label>
+			<input type="radio" id="checkbox6" name="checkbox" value="checkbox3">
+			<label for="checkbox3">Theft Over</label>
+		  </form>	 -->
+		<!-- <p>
+			<small>
+				<a href="#" id="resetLink">Reset Map</a>
+				<a href="#" id="clearLink" class="right">Clear all Markers</a>
+			</small>
+		</p> -->
+	<!-- </div>
+	<div id="displayWrapper"> </div>
+</div> -->
+
+<!-- The Javascript from external websites gets Loaded Here -->
+
+<!-- Task 2.1:  Load jQuery here (below this line) -->
+
+<script type='text/javascript' src='http://code.jquery.com/jquery-1.10.2.min.js?ver=1.10.2'></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=visualization&key=AIzaSyCK_2YHUeL00WeSl7OSZCKATaHIH7cxKG4"> </script>
+<script type='text/javascript' src='http://dev.spatialdatacapture.org/xdate/xdate.js'></script>
+<script type='text/javascript' src='./js/mapStyle.js'></script>
+
+<!-- The Javascript gets loaded here -->
+<script type="text/javascript">
+	var map;
+	var markerArray = [];
+	var dataArray = [];
+	var infowindow = new google.maps.InfoWindow({maxWidth: 300});
+ 
+
+	// const chartdata=[];
+	// const chartx=[];
+	// const chartdata2=[];
+
+
+
+	$(document).ready(function() {
+
+		//check the box
+		$("#checkbox2").change( function(event){
+			if (this.checked){getCameraData2(); $("#photoNum").html(814)}});
+		$("#checkbox3").change( function(event){
+			if (this.checked){getCameraData3(); $("#photoNum").html(877);}});
+		$("#checkbox4").change( function(event){
+			if (this.checked){getCameraData4(); $("#photoNum").html(814)}});
+		$("#checkbox5").change( function(event){
+			if (this.checked){getCameraData5(); $("#photoNum").html(877);}});
+		$("#checkbox6").change( function(event){
+			if (this.checked){getCameraData6(); $("#photoNum").html(877);}});
+
+		function initialize() {
+
+			// Task 3.4 - Make the map look pretty
+			var mapOptions = {
+				center: new google.maps.LatLng(43.680176,-79.402157),   //43.680176,-79.402157  51.514756, -0.104345
+				zoom: 12,
+			 	styles: ManilaMap
+			};
+
+			// Task 3.2 - Write the map into our DIV element
+			map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
+
+			google.maps.event.addListener(map, 'dragend', function() {
+				var bounds = map.getBounds();
+				console.log("SW: " + bounds.getSouthWest() + " NE: " + bounds.getNorthEast());
+				console.log("Center: " + map.getCenter().lat() + ", " +  map.getCenter().lng());
+				getData(map.getCenter().lat(), map.getCenter().lng());
+			});
+
+			getData(map.getCenter().lat(), map.getCenter().lng());
+		}
+
+		//create type function
+		// function getCameraData(cameraType, markerImg){
+		// 	console.log("Getting Data: " + cameraType + ", with Image: " + markerImg );
+
+		// 	setAllMap(null);
+		// 	markerArray = [];
+
+		// 	var url = "http://dev.spatialdatacapture.org:8700/data/cameraType/" + cameraType;
+
+		// 	console.log(url);
+		// 	console.log("Started ...");
+
+		// 	$.getJSON( url, function( data ) {
+		// 		$.each(data, function(k,v){
+					
+		// 			var latLng = new google.maps.LatLng(v.lat, v.lng);
+					
+		// 			dataArray.push(latLng);
+					
+		// 			var marker = new google.maps.Marker({
+      	// 				position: latLng, 
+      	// 				icon: "./img/" + markerImg,
+      	// 				customInfo: v.objectid				
+      	// 			});
+
+		// 			google.maps.event.addListener(marker, 'click', function(content) {
+		// 				return function(){
+		// 					infowindow.setContent("");
+		// 					map.setCenter(new google.maps.LatLng(v.lat, v.lng));
+		// 					$.getJSON("http://dev.spatialdatacapture.org:"+port+"/data/photoDescription/"+this.customInfo, function( data ) {
+		// 						var dateTaken = new XDate((data[0].date_uploaded * 1000)).toString("MMM d, yyyy HH:mm:ss");
+		// 						var content = "<b>Photo ID: </b>"+v.pid+"<br/> <br/><b>Description:</b><br/> "+data[0].description.replaceAll("+", " ")+" <br/> <br/><b>Date Taken: </b> "+dateTaken+" <br/><b>Camera: </b> "+data[0].device.replaceAll("+", " ")+"<br/><b>Location:</b> "+ v.coords.y + ", " + v.coords.x +" <br/><br/> <b>Photo</b> <br/><br/> <img src='"+data[0].download_url+"' width='300px' alt='Description'>";
+		// 				    	infowindow.setContent(content);
+		// 				    });
+			
+		// 				    infowindow.open(map,this);
+		// 				}
+		// 			}(""));
+
+		// 			markerArray.push(marker);
+
+      	// 		});
+
+      	// 		$("#photoNum").html(data.length);
+      	// 		console.log("Done!");
+      			
+      	// 		setAllMap(map);
+		// 	});
+		// }
+
+				function getData(lat, lng){
+				var lat = lat.toFixed(2);
+				var lng = lng.toFixed(3);
+
+				console.log("Getting Data: " + lat + ", " + lng );
+
+				setAllMap(null);
+				markerArray = [];
+
+			// Task 4.1 - Edit this variable so that it points to our API Look at http://dev.spatialdatacapture.org:8870 for the values you need
+				var url = "http://dev.spatialdatacapture.org:8748/crimedata/"+lat+"/"+lng+"/500";
+				$.getJSON( url , function( data ) {
+
+				// Task 4.2 -- Add a loop  Make sure you end it as well.  -- Don't uncomment this line
+				$.each(data, function(k,v){
+						var latLng = new google.maps.LatLng(v.lat, v.lng);
+
+						dataArray.push(latLng);
+
+						var marker = new google.maps.Marker({
+		      				position: latLng,
+		      				icon: "./img/icon.png",
+		      				customInfo: v.objectid
+		      			});
+
+						// function chartIt() {
+							// 	const ctx = document.getElementById('chart');
+							// 	Chart.defaults.color='#194350';
+							// 	const myChart = new Chart(ctx, {
+							// 	type: 'bar',
+							// 	data: {
+							// 			labels: chartx,
+							// 			datasets: [{
+							// 					label: 'XXXXXXXXXX',
+							// 					data:chartdata,
+							// 					backgroundColor: 'rgba(250, 127, 114, 1)',
+							// 					//borderColor: 'rgba(255, 99, 132, 1)',
+							// 					//borderWidth: 1
+							// 			}]
+							// 		},
+
+							// 	});
+
+
+							// 	$(".clearLink").click( function(event){
+							// 		myChart.destroy();
+
+							// 		chartdata.length = 0;
+							// 		chartx.length = 0;
+							// 		event.preventDefault();
+							// 		location.reload();
+							// 	});
+
+							// };
+
+							// function chartIt2() {
+							// 	const ctx = document.getElementById('chart2');
+							// 	Chart.defaults.color='#194350';
+							// 	const myChart2 = new Chart(ctx, {
+							// 	type: 'bar',
+							// 	data: {
+							// 			labels: chartx,
+							// 			datasets: [{
+							// 					label: 'XXXXXXX',
+							// 					data:chartdata2,
+							// 					backgroundColor: 'rgba(245, 162, 93, 1)',
+							// 					yAxisID:'Amount',
+							// 					//borderColor: 'rgba(255, 99, 132, 1)',
+							// 					//borderWidth: 1
+							// 			}]
+							// 		},
+
+
+							// 	});
+
+
+							// 	$(".clearLink").click( function(event){
+							// 		myChart2.destroy();
+
+							// 		chartdata2.length = 0;
+							// 		chartx2.length = 0;
+							// 		event.preventDefault();
+							// 		location.reload();
+							// 	});
+
+							// };
+
+							google.maps.event.addListener(marker, 'mouseover', function(content) {
+								return function(){
+									infowindow.setContent("");
+
+									//map.setCenter(new google.maps.LatLng(v.coords.y, v.coords.x));
+									$.getJSON("http://dev.spatialdatacapture.org:8748/crimedata/"+this.customInfo, function( data ) {
+										var content = "<b>Cases ID: </b>"+v.objectid+"<br/><b>Cases Location:</b><br/> "+v.location+"";
+								    	infowindow.setContent(content);
+								    });
+
+								    infowindow.open(map,this);
+								}
+
+							}(""));
+
+							// google.maps.event.addListener(marker, 'mouseout', function(content) {
+							// 	return function(){
+							// 		infowindow.setContent("");
+
+							// 			infowindow.close();
+							// 	}
+
+
+							// }(""));
+
+							// google.maps.event.addListener(marker, 'click', function(clickinfo1,clickinfo2) {
+							// 	return function(){
+							// 		marker.setIcon("./img/icon.png");
+
+							// 		//map.setCenter(new google.maps.LatLng(v.coords.y, v.coords.x));
+							// 		$.getJSON("http://dev.spatialdatacapture.org:XXXX/data/dropoff/pickup/location/"+this.customInfo, function( data ) {
+							// 			console.log(v);
+							// 			var clickinfo1 = v.dropoff;
+							// 			var clickinfo2=v.pickup;
+							// 			var clickx1=v.location
+							// 			//var clickinfo= [v.dropoff, v.pickup];
+							// 			chartdata.push(clickinfo1);
+							// 			chartx.push(clickx1);
+							// 			chartdata2.push(clickinfo2);
+							// 			console.log(chartdata);
+
+							// 			$(".showLink").click( function(event)
+							// 			{
+							// 				chartIt();
+							// 				chartIt2();
+							// 			});
+
+							// 	    });
+
+							// 	}
+
+							// }(""));
+
+							markerArray.push(marker);
+
+		      			});
+					// Task 4.3 -- Write the number of rows returned into a element.
+
+		      			$("#photoNum").html(data.length);
+		      			setAllMap(map);
+					});
+				}
+
+		// Task 3.1 - Start the map using a function		
+		google.maps.event.addDomListener(window, 'load', initialize);
+
+		// Task 6 --  Make the markers display on map load.
+
+	});
+	//  ******************* FUNCTIONS TO USE FOR THE MAP YOU DON"T NEED TO EDIT ANYTHING BELOW THIS LINE **************************************************
+
+	function createMarkers(){
+		var marker = new google.maps.Marker({
+  			position: latLng
+  		});
+	}
+
+	function setAllMap(map) {
+		for (var i = 0; i < markerArray.length; i++) {
+			markerArray[i].setMap(map);
+		}
+	}
+
+	function clearMarkers() {
+		setAllMarkers(null);
+	}
+
+	String.prototype.replaceAll = function(str1, str2, ignore) {
+    	return decodeURIComponent( this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(str2)=="string")?str2.replace(/\$/g,"$$$$"):str2) );
+	}
+</script>
+</body>
+</html>
